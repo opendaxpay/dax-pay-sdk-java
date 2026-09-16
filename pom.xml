@@ -11,7 +11,7 @@
 
     <name>DaxPay Open SDK for Java</name>
     <description>DaxPay 开放支付平台 Java SDK（核心支付子集：pay / close / refund / query / 回调验签）</description>
-    <url>https://github.com/daxpay/daxpay-open-sdk-java</url>
+    <url>https://github.com/opendaxpay/dax-pay-sdk-java</url>
 
     <licenses>
         <license>

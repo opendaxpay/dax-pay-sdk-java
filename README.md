@@ -7,16 +7,16 @@ DaxPay 开放支付平台 Java SDK，封装支付下单、关闭、退款、订�
 ## 功能
 
 - RSA 双向签名（SHA256withRSA），自动签名请求 / 验签响应与回调
-- 走 JSON 签名路径，与开源版后端 `reqTime`（OffsetDateTime）契约对齐
+- 走 JSON 签名路径，与开源版后端 `reqTime`（北京时间字面量）契约对齐
 - 核心支付接口：pay / close / refund / query pay-order / query refund-order
 - 异步回调验签
 
 ## 安装（源码引入）
 
 ```bash
-git clone https://github.com/daxpay/daxpay-open-sdk-java.git
-cd daxpay-open-sdk-java
-mvnd clean install -Dmaven.test.skip=true
+git clone https://github.com/opendaxpay/dax-pay-sdk-java.git
+cd dax-pay-sdk-java
+mvn clean install -Dmaven.test.skip=true
 ```
 
 ```xml
@@ -55,13 +55,13 @@ DaxResult<PayResult> result = client.execute(PayRequest.pay(param));
 // boolean ok = client.verifyNotice(rawBody);
 ```
 
-> 完整可运行示例见 `examples/`（实现中）。
+> 完整可运行示例见 [`examples/PayExample.java`](examples/PayExample.java)。
 
-## 契约文档
+## 接口文档
 
-- 接口契约：[`daxpay-open/_doc/design/sdk-contract.md`](../../dax-pay-open/_doc/design/sdk-contract.md)
-- 黄金测试向量：[`sdk-test-vectors.md`](../../dax-pay-open/_doc/design/sdk-test-vectors.md)
+- [接入准备](https://doc.open.daxpay.cn/api/getting-started) · [签名规则](https://doc.open.daxpay.cn/api/signature)
+- 黄金测试向量：见 [`GoldenVectorTest.java`](src/test/java/cn/daxpay/open/sdk/GoldenVectorTest.java)（与后端签名契约同源断言）
 
 ## License
 
-LGPL-3.0，与主仓库 [DaxPay Open](../../dax-pay-open) 同协议。
+LGPL-3.0，与主仓库 [DaxPay Open](https://gitee.com/dromara/dax-pay) 同协议。

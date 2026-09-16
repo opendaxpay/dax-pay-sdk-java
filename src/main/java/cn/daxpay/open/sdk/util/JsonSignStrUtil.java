@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Objects;
 
 /// # Json 签名字符串工具类
 ///
@@ -40,7 +41,7 @@ public final class JsonSignStrUtil {
     /// 递归扁平化（对照后端 JsonSignStrUtil#flatten）
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void flatten(String prefix, Object value, Map<String, String> result) {
-        if (value == null) {
+        if (Objects.isNull(value)) {
             return;
         }
         // BigDecimal 去尾零（避免 100.00 vs 100）

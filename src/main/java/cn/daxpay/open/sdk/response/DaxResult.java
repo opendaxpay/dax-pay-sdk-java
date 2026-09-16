@@ -18,7 +18,7 @@ public class DaxResult<T> {
     /// 签名（Base64）
     private String sign;
 
-    /// 响应时间（UTC ISO 字符串）
+    /// 响应时间（北京时间 yyyy-MM-dd HH:mm:ss）
     private String resTime;
 
     /// 请求 ID（回显入参 reqId）

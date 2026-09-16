@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.Objects;
 
 /// # DaxPay SDK 客户端
 ///
@@ -35,7 +36,7 @@ public class DaxPayClient {
         // param → JSONObject（保留字段），注入公共字段
         JSONObject json = JSONUtil.parseObj(JSONUtil.toJsonStr(param));
         json.putIfAbsent("mchNo", config.getMchNo());
-        if (config.getAppId() != null) {
+        if (Objects.nonNull(config.getAppId())) {
             json.putIfAbsent("appId", config.getAppId());
         }
         json.putIfAbsent("reqId", UUID.randomUUID().toString());
@@ -74,7 +75,7 @@ public class DaxPayClient {
             throw new RuntimeException("[" + raw.getCode() + "] " + raw.getMsg());
         }
         T data = null;
-        if (raw.getData() != null) {
+        if (Objects.nonNull(raw.getData())) {
             data = raw.getData().toBean(dataClass);
         }
         DaxResult<T> result = new DaxResult<>();
