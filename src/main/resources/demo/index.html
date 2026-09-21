@@ -1156,7 +1156,7 @@
     if (result.msg) { bar.appendChild(tag('neutral', esc(result.msg))); }
     if (res.signVerified === true) { bar.appendChild(tag('ok', '响应验签 ✓')); }
     else if (res.signVerified === false) { bar.appendChild(tag('fail', '响应验签 ✗')); }
-    else if (res.responseBody) { bar.appendChild(tag('neutral', '响应未签名（平台异常响应）')); }
+    else if (res.responseBody) { bar.appendChild(tag('neutral', '响应未签名（旧版平台/报文解析失败）')); }
     if (res.durationMs !== undefined) { bar.appendChild(tag('neutral', res.durationMs + ' ms')); }
     if (res.error) { bar.appendChild(tag('fail', '错误: ' + esc(res.error))); }
 

@@ -419,7 +419,8 @@ public class DemoServer {
 
     /// 响应验签（demo 层独立复核，便于对照 SDK 内部验签行为）
     ///
-    /// 返回 null 表示响应不带签名——平台业务异常经全局异常处理器返回 Result 形状（无 sign），
+    /// 返回 null 表示响应不带签名——平台自 2026-09-21 起失败响应也已带签名，
+    /// 无签名只会出现在旧版平台（全局异常处理器返回 Result 形状）或切面之前的报文解析失败，
     /// 页面据此显示"未签名"而非"验签失败"。
     private Boolean verifyResponse(String responseBody, DaxPayConfig cfg) {
         if (responseBody == null || responseBody.isEmpty()) {

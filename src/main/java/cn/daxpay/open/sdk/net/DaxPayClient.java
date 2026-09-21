@@ -106,9 +106,11 @@ public class DaxPayClient {
             observer.onResponse(responseBody);
         }
 
-        // 验签策略：带 sign 的响应强制校验；成功响应必须带签名；失败响应可无签名。
-        // 平台业务异常经全局异常处理器返回 Result 形状（code/message，无 sign，data 为 null），
-        // 若一并按"必验签"处理，业务错误会被误报为验签失败、真实错误码与消息全部丢失。
+        // 验签策略：带 sign 的响应强制校验；成功响应必须带签名；失败响应允许无签名（兼容旧版平台）。
+        // 平台自 2026-09-21 起已统一：验签阶段失败（商户不存在/验签失败/防重放等）与控制器内业务异常
+        // 都返回带签名的 DaxResult，失败响应与成功响应同形。无签名的失败响应只会来自旧版平台
+        // （其全局异常处理器返回管理 API 的 Result 形状：code/message，无 sign），
+        // 此处保留兼容读取，避免旧版平台下真实错误码与消息全部丢失。
         JSONObject respJson = JSONUtil.parseObj(responseBody);
         boolean signed = StrUtil.isNotBlank(respJson.getStr("sign"));
         if (signed) {
@@ -124,7 +126,7 @@ public class DaxPayClient {
         DaxResult<JSONObject> raw = JSONUtil.toBean(responseBody,
                 new TypeReference<DaxResult<JSONObject>>() {
                 }, true);
-        // 兼容平台异常响应的 message 字段（DaxResult 为 msg）
+        // 兼容旧版平台异常响应的 message 字段（DaxResult 为 msg）
         if (StrUtil.isBlank(raw.getMsg())) {
             raw.setMsg(respJson.getStr("message"));
         }
