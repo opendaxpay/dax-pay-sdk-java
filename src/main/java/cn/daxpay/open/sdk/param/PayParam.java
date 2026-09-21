@@ -1,8 +1,11 @@
 package cn.daxpay.open.sdk.param;
 
+import java.util.List;
+
 /// # 支付下单请求参数
 ///
-/// 对照契约 6.1 节（核心字段，公共字段由 DaxPayClient 注入）
+/// 对照契约 6.1 节（公共字段由 DaxPayClient 注入）。
+/// 嵌套类型 [GoodsDetail] / [TerminalInfo] 已建模；通道特有长尾参数仍可走 extraParam。
 public class PayParam {
 
     /// 商户订单号（必填）
@@ -19,10 +22,18 @@ public class PayParam {
     private String product;
     /// 支付方式编码
     private String method;
+    /// 支付能力编码
+    private String capability;
     /// 用户 OpenId（微信 jsapi/mini 场景）
     private String openId;
+    /// 通道应用 AppId（微信 wxAppId 等）
+    private String channelAppId;
     /// 付款码（被扫支付）
     private String authCode;
+    /// 限制支付类型（如 ["no_credit"]）
+    private List<String> limitPay;
+    /// 支付扩展参数（JSON 字符串，通道特有长尾参数）
+    private String extraParam;
     /// 异步通知地址
     private String notifyUrl;
     /// 同步跳转地址
@@ -31,6 +42,14 @@ public class PayParam {
     private String attach;
     /// 过期时间（GMT+8 yyyy-MM-dd HH:mm:ss）
     private String expiredTime;
+    /// 订单商品明细（用于单品营销/电子发票）
+    private List<GoodsDetail> goodsDetail;
+    /// 终端信息（线下 POS/收银台场景）
+    private TerminalInfo terminal;
+    /// 订单来源标识
+    private String source;
+    /// 是否为分账订单（分账链路前置条件：下单未声明则通道拒绝后续分账）
+    private Boolean allocation;
 
     public String getBizOrderNo() {
         return bizOrderNo;
@@ -95,6 +114,15 @@ public class PayParam {
         return this;
     }
 
+    public String getCapability() {
+        return capability;
+    }
+
+    public PayParam setCapability(String capability) {
+        this.capability = capability;
+        return this;
+    }
+
     public String getOpenId() {
         return openId;
     }
@@ -104,12 +132,39 @@ public class PayParam {
         return this;
     }
 
+    public String getChannelAppId() {
+        return channelAppId;
+    }
+
+    public PayParam setChannelAppId(String channelAppId) {
+        this.channelAppId = channelAppId;
+        return this;
+    }
+
     public String getAuthCode() {
         return authCode;
     }
 
     public PayParam setAuthCode(String authCode) {
         this.authCode = authCode;
+        return this;
+    }
+
+    public List<String> getLimitPay() {
+        return limitPay;
+    }
+
+    public PayParam setLimitPay(List<String> limitPay) {
+        this.limitPay = limitPay;
+        return this;
+    }
+
+    public String getExtraParam() {
+        return extraParam;
+    }
+
+    public PayParam setExtraParam(String extraParam) {
+        this.extraParam = extraParam;
         return this;
     }
 
@@ -146,6 +201,42 @@ public class PayParam {
 
     public PayParam setExpiredTime(String expiredTime) {
         this.expiredTime = expiredTime;
+        return this;
+    }
+
+    public List<GoodsDetail> getGoodsDetail() {
+        return goodsDetail;
+    }
+
+    public PayParam setGoodsDetail(List<GoodsDetail> goodsDetail) {
+        this.goodsDetail = goodsDetail;
+        return this;
+    }
+
+    public TerminalInfo getTerminal() {
+        return terminal;
+    }
+
+    public PayParam setTerminal(TerminalInfo terminal) {
+        this.terminal = terminal;
+        return this;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public PayParam setSource(String source) {
+        this.source = source;
+        return this;
+    }
+
+    public Boolean getAllocation() {
+        return allocation;
+    }
+
+    public PayParam setAllocation(Boolean allocation) {
+        this.allocation = allocation;
         return this;
     }
 }

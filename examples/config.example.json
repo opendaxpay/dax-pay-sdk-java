@@ -1,0 +1,10 @@
+{
+  "serviceUrl": "http://127.0.0.1:9999",
+  "mchNo": "M200000001",
+  "appId": "",
+  "privateKey": "",
+  "privateKeyPath": "keys/mch-private.pem",
+  "publicKey": "",
+  "publicKeyPath": "keys/platform-public.pem",
+  "port": 9799
+}

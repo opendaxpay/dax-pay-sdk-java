@@ -13,3 +13,8 @@ target/
 .factorypath
 .flattened-pom.xml
 dependency-reduced-pom.xml
+
+# 联调 demo 本地配置与密钥（模板见 examples/config.example.json）
+examples/config.local.json
+keys/
+*.pem
