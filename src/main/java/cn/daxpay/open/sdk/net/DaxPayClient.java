@@ -8,6 +8,7 @@ import cn.daxpay.open.sdk.param.GatewayOrderQueryParam;
 import cn.daxpay.open.sdk.param.GatewayPrePayParam;
 import cn.daxpay.open.sdk.param.PayParam;
 import cn.daxpay.open.sdk.param.PayQueryParam;
+import cn.daxpay.open.sdk.param.PingParam;
 import cn.daxpay.open.sdk.param.PaySyncParam;
 import cn.daxpay.open.sdk.param.RefundParam;
 import cn.daxpay.open.sdk.param.RefundQueryParam;
@@ -24,6 +25,7 @@ import cn.daxpay.open.sdk.result.GatewayPrePayResult;
 import cn.daxpay.open.sdk.result.NormalPayResult;
 import cn.daxpay.open.sdk.result.PayOrderResult;
 import cn.daxpay.open.sdk.result.PaySyncResult;
+import cn.daxpay.open.sdk.result.PingResult;
 import cn.daxpay.open.sdk.result.RefundOrderResult;
 import cn.daxpay.open.sdk.result.RefundResult;
 import cn.daxpay.open.sdk.result.RefundSyncResult;
@@ -70,6 +72,13 @@ public class DaxPayClient {
 
     /// 通用执行：自动填充公共参数 → JSON 签名 → POST → 验签 → 按 dataClass 解析 data
     public <T> DaxResult<T> execute(String path, Object param, Class<T> dataClass) {
+        return execute(path, param, dataClass, true);
+    }
+
+    /// execute 的完整形态：throwOnBizError=false 时非 0 业务码不抛异常而是原样返回 DaxResult
+    /// （签名自检探针的职责是报告检查结果，失败码/失败消息本身就是有效答案）；
+    /// 响应验签失败仍抛异常（那是平台公钥配置问题，属于硬错误而非探针答案）。
+    public <T> DaxResult<T> execute(String path, Object param, Class<T> dataClass, boolean throwOnBizError) {
         // param → JSONObject（保留字段），注入公共字段
         JSONObject json = JSONUtil.parseObj(JSONUtil.toJsonStr(param));
         json.putIfAbsent("mchNo", config.getMchNo());
@@ -131,7 +140,14 @@ public class DaxPayClient {
             raw.setMsg(respJson.getStr("message"));
         }
         if (raw.getCode() != 0) {
-            throw new RuntimeException("[" + raw.getCode() + "] " + raw.getMsg());
+            if (throwOnBizError) {
+                throw new RuntimeException("[" + raw.getCode() + "] " + raw.getMsg());
+            }
+            // 非 0 码时 data 必为 null，直接组装返回（探针诊断路径）
+            DaxResult<T> errResult = new DaxResult<>();
+            errResult.setCode(raw.getCode()).setMsg(raw.getMsg())
+                    .setSign(raw.getSign()).setResTime(raw.getResTime()).setReqId(raw.getReqId());
+            return errResult;
         }
         T data = null;
         if (Objects.nonNull(raw.getData())) {
@@ -216,6 +232,15 @@ public class DaxPayClient {
     /// 网关订单查询 — POST /unipay/gateway/query
     public DaxResult<GatewayOrderResult> gatewayQuery(GatewayOrderQueryParam param) {
         return execute("/unipay/gateway/query", param, GatewayOrderResult.class);
+    }
+
+    /// 签名自检探针 — POST /unipay/ping（走完整验签链路，一键判定商户号/应用/私钥/签名串是否可用）
+    ///
+    /// 与免签名 [#ping] 互补：本方法由持商户私钥方发起，非 0 业务码不抛异常而是原样返回，
+    /// 供调用方按 code 分类诊断（20052=验签失败且 msg 含服务端待签串；10408-10411=nonce/时钟；
+    /// 其余=商户号/应用类）；响应验签失败仍抛异常（平台公钥配置问题）。
+    public DaxResult<PingResult> signedPing(PingParam param) {
+        return execute("/unipay/ping", param, PingResult.class, false);
     }
 
     /// 回调链路自检探针 — GET /unipay/callback/ping（免签名免登录，返回固定标识文本）
