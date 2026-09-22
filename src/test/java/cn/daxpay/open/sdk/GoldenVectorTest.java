@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /// Java 因与后端同语言同库（hutool），本测试同时验证后端验签链路正确性。
 class GoldenVectorTest {
 
-    // 官方测试密钥对（RSA-2048，公开，测试专用）
-    private static final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n" +
+    // 官方测试密钥对（RSA-2048，公开，测试专用）；包内共享给 PemToleranceTest
+    static final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n" +
             "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQClTNVpzrAL9IgQ\n" +
             "Z6HeV8Ov05gV9DLvgEVOxmxneCyaMLeAZBMyxs8Uvudw4QhPHercHLhg0Slhnoif\n" +
             "XI7tKO+/nm2gxcatfQzzYy9AN7A2BWcJZB8Yu4bWayzK3X9lRt9kXMTyiLwvk4o7\n" +
@@ -44,7 +44,7 @@ class GoldenVectorTest {
             "AxnJl5/NyDmL/YfSVksVOZud\n" +
             "-----END PRIVATE KEY-----";
 
-    private static final String PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" +
+    static final String PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n" +
             "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApUzVac6wC/SIEGeh3lfD\n" +
             "r9OYFfQy74BFTsZsZ3gsmjC3gGQTMsbPFL7ncOEITx3q3By4YNEpYZ6In1yO7Sjv\n" +
             "v55toMXGrX0M82MvQDewNgVnCWQfGLuG1mssyt1/ZUbfZFzE8oi8L5OKO/cf0kxX\n" +

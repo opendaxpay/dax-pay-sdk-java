@@ -8,6 +8,7 @@ import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 /// # RSA 签名工具类
 ///
@@ -18,18 +19,62 @@ public final class RsaSignUtil {
 
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
+    /// 全部空白与不可见字符。UNICODE_CHARACTER_CLASS 让 \s 覆盖 Unicode 空白（含 NBSP U+00A0）；
+    /// 零宽空格 / 零宽连接符 / 词连接符 / BOM / 软连字符不属于空白，需单独列出
+    private static final Pattern INVISIBLE = Pattern.compile(
+            "[\\s\\u200b\\u200c\\u200d\\u2060\\ufeff\\u00ad]+", Pattern.UNICODE_CHARACTER_CLASS);
+
+    /// Base64 字母表
+    private static final Pattern BASE64_BODY = Pattern.compile("[A-Za-z0-9+/]+");
+
     private RsaSignUtil() {
+    }
+
+    /// 剥掉 -----BEGIN xxx----- / -----END xxx----- 标记，返回中间内容
+    /// （标记之外的前后说明文字一并丢弃，与其它语言版本一致）
+    private static String stripArmor(String text) {
+        String body = text;
+        int begin = body.indexOf("-----BEGIN");
+        if (begin >= 0) {
+            body = body.substring(begin + "-----BEGIN".length());
+            // 跳过 " xxx-----" 到起始标记结束
+            int close = body.indexOf("-----");
+            if (close >= 0) {
+                body = body.substring(close + "-----".length());
+            }
+        }
+        int end = body.indexOf("-----END");
+        if (end >= 0) {
+            body = body.substring(0, end);
+        }
+        return body;
+    }
+
+    /// 从任意形态的密钥文本中提取 DER。
+    ///
+    /// 从网页 / 聊天窗口 / PDF / IDE 复制 PEM 时，正文换行常被替换成空格或不换行空格（NBSP），
+    /// 或整段压成一行、混入零宽字符，甚至只剩裸 Base64。这里统一归一：剥掉头尾标记、
+    /// 剔除全部空白与不可见字符，再按 Base64（含无填充变体）解出 DER
+    /// （与 Go/Node/Python/PHP 版同一套行为，见 Go 版 `daxpay/pem.go`）。
+    private static byte[] decodeKeyContent(String pemContent, String label) {
+        if (pemContent == null || pemContent.trim().isEmpty()) {
+            throw new IllegalArgumentException(label + "内容为空");
+        }
+        String body = INVISIBLE.matcher(stripArmor(pemContent)).replaceAll("");
+        if (body.isEmpty()) {
+            throw new IllegalArgumentException("未找到密钥内容，请确认已完整复制 PEM（含 BEGIN / END 两行）");
+        }
+        String unpadded = body.replaceAll("=+$", "");
+        if (!BASE64_BODY.matcher(unpadded).matches() || unpadded.length() % 4 == 1) {
+            throw new IllegalArgumentException("密钥内容不是合法的 Base64，请确认复制完整且未混入其它字符");
+        }
+        // 部分来源会去掉 Base64 末尾的填充等号，这里补齐后再解码
+        return Base64.getDecoder().decode(unpadded + "=".repeat((4 - unpadded.length() % 4) % 4));
     }
 
     /// 读取 PKCS#8 私钥（兼容旧 RSA PRIVATE KEY 头）
     public static PrivateKey loadPrivateKeyFromPem(String pemContent) {
-        String privateKeyPEM = pemContent
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                .replace("-----END RSA PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-        byte[] decoded = Base64.getDecoder().decode(privateKeyPEM);
+        byte[] decoded = decodeKeyContent(pemContent, "私钥");
         try {
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
             KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -41,11 +86,7 @@ public final class RsaSignUtil {
 
     /// 读取 X.509 公钥
     public static PublicKey loadPublicKeyFromPem(String pemContent) {
-        String publicKeyPEM = pemContent
-                .replace("-----BEGIN PUBLIC KEY-----", "")
-                .replace("-----END PUBLIC KEY-----", "")
-                .replaceAll("\\s", "");
-        byte[] decoded = Base64.getDecoder().decode(publicKeyPEM);
+        byte[] decoded = decodeKeyContent(pemContent, "公钥");
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
         try {
             KeyFactory kf = KeyFactory.getInstance("RSA");
