@@ -5,29 +5,18 @@ package cn.daxpay.open.sdk.result;
 /// 对照契约 6.1 节 NormalPayResult
 public class NormalPayResult {
 
-    /// 订单 ID
-    private Long orderId;
     /// 商户订单号
     private String bizOrderNo;
     /// 平台业务单号
     private String orderNo;
     /// 资金交易号
     private String tradeNo;
-    /// 支付状态：wait/progress/success/close/cancel/fail/timeout
+    /// 支付状态（资金态）：init/processing/success/fail/close/cancel
     private String status;
     /// 支付参数体（二维码链接/调起参数/跳转 URL）
     private String payBody;
     /// 支付参数体类型：code_url/pay_info/redirect_url
     private String payBodyType;
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public NormalPayResult setOrderId(Long orderId) {
-        this.orderId = orderId;
-        return this;
-    }
 
     public String getBizOrderNo() {
         return bizOrderNo;

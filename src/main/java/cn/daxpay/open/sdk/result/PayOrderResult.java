@@ -25,6 +25,8 @@ public class PayOrderResult {
     private String limitPay;
     /// 金额（分）
     private Long amount;
+    /// 币种 ISO 4217（如 cny/usd，缺省 cny）
+    private String currency;
     /// 实收金额（分）
     private Long realAmount;
     /// 可退款余额（分）
@@ -139,6 +141,15 @@ public class PayOrderResult {
 
     public PayOrderResult setAmount(Long amount) {
         this.amount = amount;
+        return this;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public PayOrderResult setCurrency(String currency) {
+        this.currency = currency;
         return this;
     }
 
